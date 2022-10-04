@@ -1,0 +1,17 @@
+module realClock (clk, toggle);
+
+	input logic clk;
+	output logic toggle;
+	
+	integer cycle_count;
+	
+	always_ff @ (posedge clk) begin		
+		if (cycle_count >= 400) begin // change this number to adjust the speed of animation
+			cycle_count <= 0; // be sure to reset the counter when the animation triggers
+			toggle <= 1;
+		end
+		else
+			cycle_count <= cycle_count + 1;
+			toggle <= 0;
+	end
+endmodule

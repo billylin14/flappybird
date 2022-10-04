@@ -1,0 +1,70 @@
+// Billy Lin
+// EE 271
+// 8/15/19
+// Lab 6 topLight.sv
+
+//done testing
+
+module topLight (clk, reset, press, bottom, lightOn);
+
+	input logic clk, reset;
+	input logic press, bottom;
+	output logic lightOn;
+	
+	enum {on, off} ps, ns;
+	
+	// next state logic
+	always_comb begin
+		case (ps)
+			on: if (press) ns = on;
+				 else ns = off;
+			off: if (press&bottom) ns = on;
+				  else ns = off;
+		endcase
+	end
+	
+	// output logic
+	always_comb begin
+		case (ps)
+			on: if (press&bottom) lightOn = 0;
+				 else lightOn = 1;
+			off: if (press&bottom) lightOn = 1;
+				  else lightOn = 0;
+		endcase
+	end
+	
+	// DFF logic
+	always_ff @(posedge clk) begin
+		if (reset) ps <= off; 
+		else ps <= ns;
+	end
+endmodule
+
+//Testing the different combinations of inputs to see the expected outputs
+module topLight_testbench();
+
+	logic clk, reset, press, bottom, top, lightOn;
+	
+	topLight dut (clk, reset, press, bottom, top, lightOn);
+
+	// Set up the clock.
+	parameter CLOCK_PERIOD=100;
+	
+	initial begin
+		clk <= 0;
+		forever #(CLOCK_PERIOD/2) clk <= ~clk;
+	end
+	
+
+	// Set up the inputs to the design. Each line is a clock cycle.
+	initial begin
+		reset <= 1;												 @(posedge clk); //off
+		reset <= 0;	press <= 0; bottom <=0; top <= 0; @(posedge clk); //off
+						press <= 1; bottom <=1; top <= 0; @(posedge clk); //go up, on
+						press <= 1; bottom <=0; top <= 1; @(posedge clk); //go up, off
+						press <= 1; bottom <=0; top <= 0; @(posedge clk); //go up, off
+						press <= 0; bottom <=0; top <= 0; @(posedge clk); //go down, off
+						press <= 0; bottom <=0; top <= 1; @(posedge clk); //go down, on	
+		$stop; // End the simulation
+	end
+endmodule

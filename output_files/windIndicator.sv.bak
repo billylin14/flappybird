@@ -1,0 +1,78 @@
+module windIndicator (clk, reset, in, out);
+	
+	input logic clk, reset;
+	input logic [1:0]in;
+	output logic [1:0]out;
+ 
+	// State variables.
+	enum { calm, RL, LR } ps, ns;
+
+	// Next State logic
+	always_comb begin
+		case (ps)
+			calm: if ((in[0]==1'b0)&&(in[1]==1'b1)) ns = RL; //calm to RL
+						else if ((in[0]==1'b1)&&(in[1]==1'b0)) ns = LR; //calm to LR
+						else ns = calm0; //calm to calm
+						
+			RL: if ((in[0]==1'b0)&&(in[1]==1'b0)) ns = calm; //RL to calm
+					 else if ((in[0]==1'b1)&&(in[1]==1'b0)) ns = LR; //RL to LR
+					 else ns = RL; //RL to RL
+					 
+			LR: if ((in[0]==1'b0)&&(in[1]==1'b0)) ns = calm; //LR to calm
+					 else if ((in[0]==1'b0)&&(in[1]==1'b1)) ns = RL; //LR to RL
+					 else ns = LR; //LR to LR
+		endcase
+	end
+	
+	// Output logic - could also be another always, or part of above block.
+	assign out = in;
+	
+	// DFFs
+	always_ff @(posedge clk) begin
+		if (reset)
+			ps <= calm;
+		else
+			ps <= ns;
+	end
+endmodule
+
+module windIndicator_testbench();
+	logic clk, reset;
+	logic [1:0]in;
+	logic [1:0]out;
+ 
+
+	windIndicator dut (clk, reset, in, out);
+
+	// Set up the clock.
+	parameter CLOCK_PERIOD=100;
+	
+	initial begin
+		clk <= 0;
+		forever #(CLOCK_PERIOD/2) clk <= ~clk;
+	end
+	
+
+	// Set up the inputs to the design. Each line is a clock cycle.
+	initial begin
+								  @(posedge clk);
+		reset <= 1; 		  @(posedge clk);
+		reset <= 0; in <= {0, 0}; @(posedge clk); //calm patt1
+										  @(posedge clk); //calm patt2
+										  @(posedge clk); //calm patt1
+										  @(posedge clk); //calm patt2
+						in <= {0, 1}; @(posedge clk);	//RL patt1
+										  @(posedge clk); //RL patt2
+										  @(posedge clk); //RL patt3
+										  @(posedge clk); //RL patt1
+										  @(posedge clk); //RL patt2
+										  @(posedge clk); //RL patt3
+						in <= {1, 0}; @(posedge clk);	//LR patt1
+										  @(posedge clk); //LR patt2
+										  @(posedge clk); //LR patt3
+										  @(posedge clk); //LR patt1
+										  @(posedge clk); //LR patt2
+										  @(posedge clk); //LR patt3
+		$stop; // End the simulation.
+	end
+endmodule

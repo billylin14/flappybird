@@ -1,0 +1,35 @@
+module greenPipes(clk, reset, leftOn, lightOn);
+	input logic clk, reset, leftOn;
+	output logic lightOn;
+	
+	enum {on, off}ps, ns;
+	
+	always_comb begin
+		case (ps)
+			on: begin 
+					ns = off;
+					lightOn = 0;
+				 end
+			off:begin
+					if (leftOn) begin
+						ns = on;
+						lightOn = 1;
+					end
+					else begin
+						ns = off;
+						lightOn = 0;
+					end
+				 end
+		endcase
+	end
+	
+	always_ff @(posedge clk) begin
+		if (reset) ps <= off;
+		else ps <= ns;
+	end
+endmodule
+
+				
+	
+	
+	always_

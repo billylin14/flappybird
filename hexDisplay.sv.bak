@@ -1,0 +1,31 @@
+module hexDisplay (clk, reset, pass, HEX0, HEX1, HEX2, HEX3, HEX4, HEX5);
+
+	input logic clk, pass, reset;
+	output logic [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5;
+	
+	//HEX display logic
+	logic [4:0]nextIncr = 5'b00000;
+	
+	hexCount hex0 (.clk(clk), .reset(reset), .incr(pass), .nextIncr(nextIncr[0]), .HEX(HEX0));
+	hexCount hex1 (.clk(clk), .reset(reset), .incr(pass&nextIncr[0]), .nextIncr(nextIncr[1]), .HEX(HEX1));
+	hexCount hex2 (.clk(clk), .reset(reset), .incr(pass&nextIncr[1]), .nextIncr(nextIncr[2]), .HEX(HEX2));
+	hexCount hex3 (.clk(clk), .reset(reset), .incr(pass&nextIncr[2]), .nextIncr(nextIncr[3]), .HEX(HEX3));
+	hexCount hex4 (.clk(clk), .reset(reset), .incr(pass&nextIncr[3]), .nextIncr(nextIncr[4]), .HEX(HEX4));
+	hexCount hex5 (.clk(clk), .reset(reset), .incr(pass&nextIncr[4]), .nextIncr(1'b0), .HEX(HEX5));
+
+	always_ff @(posedge clk) begin
+		if (reset) begin
+			nextIncr = 5'b00000;
+			HEX0 = 7'b0000000;
+			HEX1 = 7'b0000000;
+			HEX2 = 7'b0000000;
+			HEX3 = 7'b0000000;
+			HEX4 = 7'b0000000;
+			HEX5 = 7'b0000000;
+		end
+	end
+	
+endmodule
+
+
+	

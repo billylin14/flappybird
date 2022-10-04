@@ -1,0 +1,13 @@
+module meta (clk, L, R, L2, R2);
+	input logic clk, L, R;
+	
+	logic L1, R1;
+	output logic L2, R2;
+	
+	always_ff @(posedge clk) begin
+		L1 <= L;
+		R1 <= R;
+		L2 <= L1;
+		R2 <= R1;
+	end
+endmodule

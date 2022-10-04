@@ -1,0 +1,43 @@
+module greenShifting (clk, cycle, reset, lose, lastColPattern, green_row);
+	input logic clk, reset, lose;
+	input logic lastColPattern;
+	output logic [7:0] green_row;
+	
+	always_ff @(posedge clk) begin
+		if (reset)
+			green_row <= '0;
+		else if (lose) begin
+			green_row[7] <= green_row[7];
+			green_row[6] <= green_row[6];
+			green_row[5] <= green_row[5];
+			green_row[4] <= green_row[4];
+			green_row[3] <= green_row[3];
+			green_row[2] <= green_row[2];
+			green_row[1] <= green_row[1];
+			green_row[0] <= green_row[0];
+		else if (cycle) begin
+			green_row[7] <= green_row[6];
+			green_row[6] <= green_row[5];
+			green_row[5] <= green_row[4];
+			green_row[4] <= green_row[3];
+			green_row[3] <= green_row[2];
+			green_row[2] <= green_row[1];
+			green_row[1] <= green_row[0];
+			green_row[0] <= lastColPattern;
+		end else begin
+			green_row[7] <= green_row[7];
+			green_row[6] <= green_row[6];
+			green_row[5] <= green_row[5];
+			green_row[4] <= green_row[4];
+			green_row[3] <= green_row[3];
+			green_row[2] <= green_row[2];
+			green_row[1] <= green_row[1];
+			green_row[0] <= green_row[0];
+		end
+	end
+endmodule
+	
+	
+	
+	
+	

@@ -1,0 +1,75 @@
+// Billy Lin
+// EE 271
+// 8/15/19
+// Lab 6 birdLight.sv
+
+module birdLight (clk, reset, press, bottom, top, lightOn);
+
+	input logic clk, reset;
+	input logic press, bottom, top;
+	output logic lightOn;
+	
+	enum {on, off} ps, ns;
+	
+	// next state logic
+	always_comb begin
+		case (ps)
+			on: ns = off;
+			off: if ((~press)|top) ns = on;
+				  else if (press|bottom) ns = on;
+				  else ns = off;
+		endcase
+	end
+	
+	// output logic
+	always_comb begin
+		case (ps)
+			on: lightOn = 0;
+			off: if ((~press)|top) lightOn = 1;
+				  else if (press|bottom) lightOn = 1;
+				  else lightOn = 0;
+		endcase
+	end
+	
+	// DFF logic
+	always_ff @(posedge clk) begin
+		if (reset) ps <= on; 
+		else ps <= ns;
+	end
+	
+endmodule
+
+/*
+//Testing the different combinations of inputs to see the expected outputs
+module centerLight_testbench();
+
+	logic clk, reset, L, R, NL, NR, lightOn;
+	
+	centerLight dut (clk, reset, L, R, NL, NR, lightOn);
+
+	// Set up the clock.
+	parameter CLOCK_PERIOD=100;
+	
+	initial begin
+		clk <= 0;
+		forever #(CLOCK_PERIOD/2) clk <= ~clk;
+	end
+	
+
+	// Set up the inputs to the design. Each line is a clock cycle.
+	initial begin
+		reset <= 1;												 @(posedge clk); //reset: currently in lit state
+		reset <= 0;	L <= 0; R <= 0; NL <= 0; NR <= 0; @(posedge clk); //when neither L R is pressed
+		/*Nlit/		L <= 1; R <= 0; NL <= 0; NR <= 0; @(posedge clk); //when L is pressed, goes to Nlit, turns light off 
+						L <= 1; R <= 0; NL <= 0; NR <= 0; @(posedge clk); //(shouldn't matter if hold Left)
+						L <= 0; R <= 1; NL <= 0; NR <= 0; @(posedge clk); //(shouldn't matter if hold Right)
+						L <= 1; R <= 0; NL <= 1; NR <= 0; @(posedge clk); //(shouldn't matter if NL is on or off)
+						L <= 1; R <= 0; NL <= 0; NR <= 1; @(posedge clk); //when L and NR is on, goes back to lit, turns light on
+		/*lit/		L <= 0; R <= 1; NL <= 0; NR <= 0; @(posedge clk); //when R is pressed, goes to Nlit, turns light off
+		/*Nlit/		L <= 1; R <= 1; NL <= 0; NR <= 0; @(posedge clk); //(shouldn't matter if both are pressed)
+		/*lit/		L <= 0; R <= 1; NL <= 1; NR <= 0; @(posedge clk); //when R is pressed and the left light is lit, goes to lit state
+						L <= 1; R <= 1; NL <= 0; NR <= 0; @(posedge clk); //(shouldn't matter if both are pressed)
+		$stop; // End the simulation
+	end
+endmodule
+*/

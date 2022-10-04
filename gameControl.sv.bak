@@ -1,0 +1,32 @@
+module gameControl (clk, reset, press, red_array, green_array, lose, pass);
+	input logic [7:0][7:0] red_array, green_array;
+	input logic clk, reset, press;
+	output logic lose, pass;
+	
+	always_comb begin
+		// (1) when red dot drops out of the grid
+		if (~press && red_array[7][3])
+			lose = 1;
+		
+		// (2) when red dot is on the same point as the green pipe
+		// Or when red dot is in the gap, it passes.
+		for (int row = 0; row < 8; row++) begin
+			if (red_array[row][3] == 1 && green_array[row][3] == 0) begin
+				pass = 1;
+				lose = 0;
+			end else if (red_array[row][3] == 1 && green_array[row][3] == 1) begin
+				pass = 0;
+				lose = 1;
+			end else begin
+				pass = 0;
+				lose = 0;
+			end
+		end
+	end
+	
+	always_ff @(posedge clk) begin
+		if (reset)
+			lose = 0;
+	end
+endmodule
+	
